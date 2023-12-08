@@ -26,20 +26,30 @@ exports.modifyBook = (req, res, next) => {
     Book.findOne({ _id: req.params.id })
         .then((book) => {
             if (book.userId !== req.auth.userId) {
-            return res.status(401).json({ error: 'User not authorized to modify this book !' });
+                return res.status(401).json({ error: 'User not authorized to modify this book !' });
             } 
             Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
-            .then(() => res.status(200).json({ message: 'Book modified !'}))
-            .catch(error => res.status(400).json({ error }));
+                .then(() => res.status(200).json({ message: 'Book modified !'}))
+                .catch(error => res.status(400).json({ error }));
         })
         .catch(error => res.status(400).json({ error }));
 };
 
 exports.deleteBook = (req, res, next) => {
-    Book.deleteOne({ _id: req.params.id })
-      .then(() => res.status(200).json({ message: 'Book deleted !'}))
-      .catch(error => res.status(400).json({ error }));
-}
+    Book.findOne({ _id: req.params.id })
+        .then(book => {
+            if (book.userId !== req.auth.userId) {
+                return res.status(401).json({ error: 'User not authorized to delete this book !' });
+            }
+            const filename = book.imageUrl.split('/images/')[1];
+            fs.unlink(`images/${filename}`, () => {
+                Book.deleteOne({ _id: req.params.id })
+                    .then(() => res.status(200).json({ message: 'Book deleted !'}))
+                    .catch(error => res.status(400).json({ error }));
+            });
+        })
+        .catch(error => res.status(500).json({ error }));
+};
 
 exports.getOneBook = (req, res, next) => {
     Book.findOne({ _id: req.params.id })
