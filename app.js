@@ -2,10 +2,13 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 
+require('dotenv').config()
+console.log(process.env) // remove this after you've confirmed it is working
+
 const bookRoutes = require('./routes/book');
 const userRoutes = require('./routes/user');
 
-mongoose.connect('mongodb+srv://lucas7OC:X4Aznwl8lfY2E7R5@cluster0.7npw4em.mongodb.net/?retryWrites=true&w=majority')
+mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}`)
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
