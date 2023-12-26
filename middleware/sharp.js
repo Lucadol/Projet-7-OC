@@ -7,36 +7,20 @@ module.exports = (req, res, next) => {
     return next();
   }
 
+  let filename = req.file.filename;
+  filename = filename.replace(/\.(jpg|jpeg|png|JPEG)$/, '');
+
+  console.log(filename)
+
   sharp(`images/${req.file.filename}`)
     .resize({ width: 450 })
-    .webp({ quality: 80 })
-    .toFile(`images/resize-${req.file.filename}`)
-  
-  next();
-
-  sharp(req.file.path)
-    .metadata()
-    .then((metadata) => {
-      if (metadata.width > 450) {
-        return sharp(req.file.path).resize({ width: 450 }).toBuffer();
-      } else {
-        console.log('<=450');
-        return sharp(req.file.path).toBuffer();
+    .webp({ lostless: true })
+    .toFile(`images/resize-${filename}.webp`, (err) => {
+      if (err) {
+        console.log("Middleware Sharp : erreur 1 :", err);
+        return next(err);
       }
-    })
-    .then((data) => {
-      fs.writeFile(`images/resize-${req.file.filename}`, data, (err) => {
-        if (err) {
-          console.log("Middelware Sharp : error 1 :");
-          console.log(err);
-          next();
-        } 
-        next();
-        
-      });
-    })
-    .catch((err) => {
-      console.log("Middelware Sharp : error :" + err);
-      next(err);
+      console.log('Image redimensionnée avec succès !');
+      next();
     });
 };
