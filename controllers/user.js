@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt'); // importe le package de chiffrement bcrypt
 const jwt = require('jsonwebtoken'); // importe le package jsonwebtoken
 
+require('dotenv').config(); // importe le package dotenv pour masquer les informations de connexion à la base de données
+
 const User = require('../models/user'); // importe le modèle User
 
 exports.signup = (req, res, next) => {
@@ -32,7 +34,7 @@ exports.login = (req, res, next) => {
                         userId: user._id,
                         token: jwt.sign( // renvoie un token d'authentification
                             { userId: user._id },
-                            'RANDOM_TOKEN_SECRET', // chaîne secrète de développement temporaire pour encoder notre token
+                            process.env.TOKEN, // chaîne secrète de développement temporaire pour encoder notre token
                             { expiresIn: '24h'}
                         )
                     });
